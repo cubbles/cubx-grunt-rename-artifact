@@ -1,9 +1,50 @@
+/* global  */
 'use strict';
 var inquirer = require('inquirer');
-var ArtifactRenamer = require('cubx-prepare-webpackage-release');
+var ArtifactRenamer = require('cubx-rename-artifact');
+var path = require('path');
+var wrap = require('wordwrap')(70);
 
 module.exports = function (grunt) {
-  grunt.registerTask('_webpackage-prepareRelease', 'Prepare the release of a webpackage', function () {
+  grunt.registerTask('_webpackage-renameArtifact', 'Rename a certain artifact', function () {
+    function getRegExpForArtifactType (artifactType) {
+      if (artifactType === 'elementaryComponents' || artifactType === 'compoundComponents') {
+        return /^[a-z0-9]+(-[a-z0-9]+)+$/;
+      } else if (artifactType === 'apps' || artifactType === 'utilities') {
+        return /^[a-z0-9-]+$/;
+      }
+    }
+
+    function getArtifactNameExamples (artifactType) {
+      switch (artifactType) {
+        case 'elementaryComponents':
+          return '\'my-elementary\' or \'my-demo-elementary\'!';
+        case 'compoundComponents':
+          return '\'my-compound\' or \'my-demo-compound\'!';
+        case 'apps':
+          return '\'demoapp\' or \'my-demo-app\'!';
+        case 'utilities':
+          return '\'util\' or \'my-demo-util\'!';
+      }
+    }
+
+    function getAllArtifacts (manifest) {
+      var artifacts = {};
+      var artifactsArrays = ['apps', 'utilities', 'elementaryComponents', 'compoundComponents'];
+      if (manifest.hasOwnProperty('artifacts')) {
+        var manifestArtifacts = manifest.artifacts;
+        artifactsArrays.forEach(function (artifactsKey) {
+          if (manifestArtifacts.hasOwnProperty(artifactsKey)) {
+            manifestArtifacts[artifactsKey].forEach(function (artifact) {
+              artifact.type = artifactsKey;
+              artifacts[artifactsKey] = artifact;
+            });
+          }
+        });
+      }
+      return artifacts;
+    }
+
     var webpackagePath = grunt.config.get('param.src');
 
     if (!webpackagePath) {
@@ -12,25 +53,33 @@ module.exports = function (grunt) {
     if (!webpackagePath) {
       throw new Error('webpackagePath missed. Please defined the option webpackagePath.');
     }
-    var wpReleasePreparer = new ArtifactRenamer(webpackagePath);
-    var currentVersion = wpReleasePreparer.getCurrentVersion();
-    var defaultReleaseV = wpReleasePreparer.isValidReleaseVersion(currentVersion)
-      ? currentVersion : wpReleasePreparer.getDefaultReleaseVersion(currentVersion);
+    var artifactRenamer = new ArtifactRenamer(webpackagePath);
+    var manifest = grunt.file.readJSON(path.join(webpackagePath, 'manifest.webpackage'));
 
+    var artifacts = getAllArtifacts(manifest);
     var options = {
       questions: [
         {
-          name: 'releaseVersion',
+          name: 'artifactId',
+          type: 'rawlist',
+          message: 'Provide the artifactId of the artifact to be renamed.',
+          choices: Object.keys(artifacts)
+        },
+        {
+          name: 'newArtifactId',
           type: 'input',
-          message: 'Please type the release version to be set to the webpackage:',
-          validate: function (input) {
-            if (!wpReleasePreparer.isValidReleaseVersion(input)) {
-              throw new Error('Invalid releaseVersion. (' + input + ') Please provide a valid release version ' +
-                'e.g. \'1.0.0\' or \'2.0\'.');
+          message: function (answers) {
+            var artifactType = artifacts[answers.artifactId].artifactType;
+            return 'Provide the new artifact name (e.g. ' + getArtifactNameExamples(artifactType) + '):';
+          },
+          validate: function (input, answers) {
+            var artifactType = artifacts[answers.artifactId].artifactType;
+            var regExp = getRegExpForArtifactType(artifactType);
+            if (!regExp.test(input)) {
+              return wrap(' Please provide a valid value like ' + getArtifactNameExamples(artifactType));
             }
             return true;
-          },
-          default: defaultReleaseV
+          }
         }
       ]
     };
@@ -38,54 +87,7 @@ module.exports = function (grunt) {
     var done = this.async();
     inquirer.prompt(options.questions).then(function (result) {
       // prepareRelease
-      wpReleasePreparer.setReleaseVersion(result.releaseVersion);
-      wpReleasePreparer.prepareUpload();
-      done();
-    });
-  });
-  grunt.registerTask('_webpackage-updateToNextVersion', 'Update manifest to next development version', function () {
-    var webpackagePath = grunt.config.get('param.src');
-
-    if (!webpackagePath) {
-      webpackagePath = grunt.config.get('webpackagepath');
-    }
-    if (!webpackagePath) {
-      throw new Error('webpackagePath missed. Please defined the option webpackagePath.');
-    }
-    var wpReleasePreparer = new ArtifactRenamer(webpackagePath);
-    var currentVersion = wpReleasePreparer.getCurrentVersion();
-    var defaultNextV;
-    if (wpReleasePreparer.isValidReleaseVersion(currentVersion)) {
-      defaultNextV = wpReleasePreparer.getDefaultNextDevVersion(currentVersion);
-    } else {
-      defaultNextV = wpReleasePreparer.getDefaultNextDevVersion(
-        wpReleasePreparer.getDefaultReleaseVersion(currentVersion)
-      );
-    }
-
-    var options = {
-      questions: [
-        {
-          name: 'nextVersion',
-          type: 'input',
-          message: 'Please type the next development version to be set to the webpackage:',
-          validate: function (input) {
-            if (!wpReleasePreparer.isValidDevVersion(input)) {
-              throw new Error('Invalid nextVersion. (' + input + ') Please provide a valid development version ' +
-                'e.g. \'1.0.0-SNAPSHOT\' or \'2.0-SNAPSHOT\'.');
-            }
-            return true;
-          },
-          default: defaultNextV
-        }
-      ]
-    };
-
-    var done = this.async();
-    inquirer.prompt(options.questions).then(function (result) {
-      // prepareRelease
-      wpReleasePreparer.setNextDevVersion(result.nextVersion);
-      wpReleasePreparer.updateManifestToNextDevVersion();
+      artifactRenamer.renameArtifact(result.artifactId, result.newArtifactId);
       done();
     });
   });

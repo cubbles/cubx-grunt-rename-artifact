@@ -28,7 +28,8 @@
   "dependencies": {
     "cubx-rename-artifact": "^1.0.0",
     "inquirer": "^1.0.3",
-    "standard": "^8.6.0"
+    "standard": "^8.6.0",
+    "wordwrap": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",

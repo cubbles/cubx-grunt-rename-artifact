@@ -26,8 +26,7 @@
   },
   "homepage": "https://github.com/cubbles/cubx-grunt-rename-artifact#readme",
   "dependencies": {
-    "cubx-grunt-webpackage-upload": "^1.8.0",
-    "cubx-prepare-webpackage-release": "^1.0.0",
+    "cubx-grunt-rename-artifact": "^1.0.0",
     "inquirer": "^1.0.3",
     "standard": "^8.6.0"
   },

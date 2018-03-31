@@ -3,7 +3,6 @@
 var inquirer = require('inquirer');
 var ArtifactRenamer = require('cubx-rename-artifact');
 var path = require('path');
-var wrap = require('wordwrap')(70);
 
 module.exports = function (grunt) {
   grunt.registerTask('_webpackage-renameArtifact', 'Rename a certain artifact', function () {
@@ -30,14 +29,14 @@ module.exports = function (grunt) {
 
     function getAllArtifacts (manifest) {
       var artifacts = {};
-      var artifactsArrays = ['apps', 'utilities', 'elementaryComponents', 'compoundComponents'];
+      var artifactsTypes = ['apps', 'utilities', 'elementaryComponents', 'compoundComponents'];
       if (manifest.hasOwnProperty('artifacts')) {
         var manifestArtifacts = manifest.artifacts;
-        artifactsArrays.forEach(function (artifactsKey) {
+        artifactsTypes.forEach(function (artifactsKey) {
           if (manifestArtifacts.hasOwnProperty(artifactsKey)) {
             manifestArtifacts[artifactsKey].forEach(function (artifact) {
-              artifact.type = artifactsKey;
-              artifacts[artifactsKey] = artifact;
+              artifact.artifactType = artifactsKey;
+              artifacts[artifact.artifactId] = artifact;
             });
           }
         });
@@ -76,7 +75,7 @@ module.exports = function (grunt) {
             var artifactType = artifacts[answers.artifactId].artifactType;
             var regExp = getRegExpForArtifactType(artifactType);
             if (!regExp.test(input)) {
-              return wrap(' Please provide a valid value like ' + getArtifactNameExamples(artifactType));
+              throw new Error('Invalid artifactName. (' + input + '). Please provide a valid value like ' + getArtifactNameExamples(artifactType));
             }
             return true;
           }

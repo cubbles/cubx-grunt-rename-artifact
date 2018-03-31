@@ -86,7 +86,7 @@ module.exports = function (grunt) {
 
     var done = this.async();
     inquirer.prompt(options.questions).then(function (result) {
-      // prepareRelease
+      // rename Artifact
       artifactRenamer.renameArtifact(result.artifactId, result.newArtifactId);
       done();
     });

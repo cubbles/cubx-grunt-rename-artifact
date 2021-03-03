@@ -1,6 +1,6 @@
 {
   "name": "cubx-grunt-rename-artifact",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Grunt package to rename an artifact of a certain webpackage",
   "main": "lib/cubx-grunt-rename-artifact.js",
   "engines": {

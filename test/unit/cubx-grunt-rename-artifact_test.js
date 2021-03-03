@@ -5,17 +5,17 @@
 (function () {
   // function (manifestConverter, manifest831, convertedManifest910) {
   'use strict';
-  var grunt;
-  var fs;
-  var path;
-  var stdin;
-  var wpBackupPath;
-  var wpPath;
-  var expectedManifestPath;
-  var wpManifestPath;
-  var invalidArtifactId;
-  var firstOption;
-  var validArtifactId;
+  let grunt;
+  let fs;
+  let path;
+  let stdin;
+  let wpBackupPath;
+  let wpPath;
+  let expectedManifestPath;
+  let wpManifestPath;
+  let invalidArtifactId;
+  let firstOption;
+  let validArtifactId;
   describe('cubx-grunt-rename-artifact-id', function () {
     before(function () {
       fs = require('fs-extra');
@@ -37,7 +37,7 @@
       fs = require('fs-extra');
       grunt = require('grunt');
       grunt.task.init = function () {};
-      var taskPath = path.resolve(process.cwd(), 'tasks');
+      const taskPath = path.resolve(process.cwd(), 'tasks');
       grunt.task.loadTasks(taskPath);
 
       fs.emptyDirSync(wpPath);
@@ -56,9 +56,9 @@
       it('should rename an artifact', function (done) {
         process.nextTick(function () { stdin.send(firstOption + '\n'); });
         setTimeout(function () { stdin.send(validArtifactId + '\n'); }, 600);
-        grunt.tasks([ '_webpackage-renameArtifact' ], {}, function () {
-          var refactoredManifest = JSON.parse(fs.readFileSync(wpManifestPath, 'utf8'));
-          var expectedManifest = JSON.parse(fs.readFileSync(expectedManifestPath, 'utf8'));
+        grunt.tasks(['_webpackage-renameArtifact'], {}, function () {
+          const refactoredManifest = JSON.parse(fs.readFileSync(wpManifestPath, 'utf8'));
+          const expectedManifest = JSON.parse(fs.readFileSync(expectedManifestPath, 'utf8'));
           expect(refactoredManifest).to.be.deep.equal(expectedManifest);
           done();
         });
@@ -79,9 +79,9 @@
       it('should rename an artifact', function (done) {
         process.nextTick(function () { stdin.send(firstOption + '\n'); });
         setTimeout(function () { stdin.send(validArtifactId + '\n'); }, 600);
-        grunt.tasks([ '_webpackage-renameArtifact' ], {}, function () {
-          var refactoredManifest = JSON.parse(fs.readFileSync(wpManifestPath, 'utf8'));
-          var expectedManifest = JSON.parse(fs.readFileSync(expectedManifestPath, 'utf8'));
+        grunt.tasks(['_webpackage-renameArtifact'], {}, function () {
+          const refactoredManifest = JSON.parse(fs.readFileSync(wpManifestPath, 'utf8'));
+          const expectedManifest = JSON.parse(fs.readFileSync(expectedManifestPath, 'utf8'));
           expect(refactoredManifest).to.be.deep.equal(expectedManifest);
           done();
         });
@@ -89,7 +89,7 @@
       it('should throw error since provided newArtifactName is invalid', function (done) {
         process.nextTick(function () { stdin.send(firstOption + '\n'); });
         setTimeout(function () { stdin.send(invalidArtifactId + '\n'); }, 600);
-        grunt.tasks([ '_webpackage-renameArtifact' ], {}, expect(function b () {
+        grunt.tasks(['_webpackage-renameArtifact'], {}, expect(function b () {
           done();
         }).to.throw(/Invalid artifactName/));
       });

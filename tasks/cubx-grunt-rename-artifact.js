@@ -1,8 +1,8 @@
 /* global  */
 'use strict';
-var inquirer = require('inquirer');
-var ArtifactRenamer = require('cubx-rename-artifact');
-var path = require('path');
+const inquirer = require('inquirer');
+const ArtifactRenamer = require('cubx-rename-artifact');
+const path = require('path');
 
 module.exports = function (grunt) {
   grunt.registerTask('_webpackage-renameArtifact', 'Rename a certain artifact', function () {
@@ -28,12 +28,12 @@ module.exports = function (grunt) {
     }
 
     function getAllArtifacts (manifest) {
-      var artifacts = {};
-      var artifactsTypes = ['apps', 'utilities', 'elementaryComponents', 'compoundComponents'];
-      if (manifest.hasOwnProperty('artifacts')) {
-        var manifestArtifacts = manifest.artifacts;
+      const artifacts = {};
+      const artifactsTypes = ['apps', 'utilities', 'elementaryComponents', 'compoundComponents'];
+      if (Object.prototype.hasOwnProperty.call(manifest, 'artifacts')) {
+        const manifestArtifacts = manifest.artifacts;
         artifactsTypes.forEach(function (artifactsKey) {
-          if (manifestArtifacts.hasOwnProperty(artifactsKey)) {
+          if (Object.prototype.hasOwnProperty.call(manifestArtifacts, artifactsKey)) {
             manifestArtifacts[artifactsKey].forEach(function (artifact) {
               artifact.artifactType = artifactsKey;
               artifacts[artifact.artifactId] = artifact;
@@ -44,7 +44,7 @@ module.exports = function (grunt) {
       return artifacts;
     }
 
-    var webpackagePath = grunt.config.get('param.src');
+    let webpackagePath = grunt.config.get('param.src');
 
     if (!webpackagePath) {
       webpackagePath = grunt.config.get('webpackagepath');
@@ -52,11 +52,11 @@ module.exports = function (grunt) {
     if (!webpackagePath) {
       throw new Error('webpackagePath missed. Please defined the option webpackagePath.');
     }
-    var artifactRenamer = new ArtifactRenamer(webpackagePath);
-    var manifest = grunt.file.readJSON(path.join(webpackagePath, 'manifest.webpackage'));
+    const artifactRenamer = new ArtifactRenamer(webpackagePath);
+    const manifest = grunt.file.readJSON(path.join(webpackagePath, 'manifest.webpackage'));
 
-    var artifacts = getAllArtifacts(manifest);
-    var options = {
+    const artifacts = getAllArtifacts(manifest);
+    const options = {
       questions: [
         {
           name: 'artifactId',
@@ -68,12 +68,12 @@ module.exports = function (grunt) {
           name: 'newArtifactId',
           type: 'input',
           message: function (answers) {
-            var artifactType = artifacts[answers.artifactId].artifactType;
+            const artifactType = artifacts[answers.artifactId].artifactType;
             return 'Provide the new artifact name (e.g. ' + getArtifactNameExamples(artifactType) + '):';
           },
           validate: function (input, answers) {
-            var artifactType = artifacts[answers.artifactId].artifactType;
-            var regExp = getRegExpForArtifactType(artifactType);
+            const artifactType = artifacts[answers.artifactId].artifactType;
+            const regExp = getRegExpForArtifactType(artifactType);
             if (!regExp.test(input)) {
               throw new Error('Invalid artifactName. (' + input + '). Please provide a valid value like ' + getArtifactNameExamples(artifactType));
             }
@@ -83,7 +83,7 @@ module.exports = function (grunt) {
       ]
     };
 
-    var done = this.async();
+    const done = this.async();
     inquirer.prompt(options.questions).then(function (result) {
       // rename Artifact
       artifactRenamer.renameArtifact(result.artifactId, result.newArtifactId);

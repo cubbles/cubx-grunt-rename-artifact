@@ -6,8 +6,8 @@ module.exports = function (grunt) {
   // Load the plugin that provides tasks.
   require('load-grunt-tasks')(grunt);
 
-   // Load grunt configurations
-  var options = {
+  // Load grunt configurations
+  const options = {
     githooks: {
       all: {
         'pre-commit': 'shell:eslint'
